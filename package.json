@@ -1,0 +1,24 @@
+{
+  "name": "mongo_backend",
+  "version": "1.0.0",
+  "description": "backend for COE order request handler",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "*",
+    "express": "*",
+    "express-fileupload": "*",
+    "fs": "*",
+    "mongoose": "*",
+    "rimraf": "*",
+    "mongoose-currency": "*",
+    "read-excel-file": "*",
+    "socket.io": "*",
+    "nodemailer": "*",
+    "package.json": "^2.0.1"
+  },
+  "author": "Kalana Sahabandu",
+  "license": "ISC"
+}
