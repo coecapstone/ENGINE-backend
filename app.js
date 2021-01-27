@@ -4,7 +4,7 @@ var bodyParser = require('body-parser');
 var mongose = require('mongoose');
 var fileUpload  = require('express-fileupload');
 
-
+// just a comment
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
