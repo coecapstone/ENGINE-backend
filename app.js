@@ -8,7 +8,7 @@ var fileUpload  = require('express-fileupload');
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, X-Remote-User, Content-Type, Accept");
     next();
   });
   
@@ -61,6 +61,32 @@ io.on('connection', function(client){
 //------------------------get request for landing page-------------------------------------------
 app.get('/',function(req,res){
     res.send('Please use /api/ to access the API');
+});
+
+// For debugging only, a GET version
+app.get('/api/whoami',function(req,res){
+    var uwnetid = null;
+    for (let k in req.headers) {
+      if (k == 'x-remote-user') {
+        uwnetid = req.headers[k];
+      }
+    }
+    res.end('Hello ' + uwnetid);
+});
+
+app.post('/api/whoami',function(req,res){
+    var uwnetid = null;
+    for (let k in req.headers) {
+      if (k == 'x-remote-user') {
+        uwnetid = req.headers[k];
+      }
+    }
+    if (uwnetid == null)
+        res.json({"status":false});
+    else {
+        uwnetid = uwnetid.replace("@washington.edu", "");
+        res.json({"status":true, "data":{"uwnetid":uwnetid}});
+    }
 });
 
 app.post('/api/testNotification',function(req,res){
