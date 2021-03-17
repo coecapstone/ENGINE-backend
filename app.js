@@ -39,7 +39,7 @@ var io = require('socket.io')(server);
 
 //app.listen(process.env.PORT|| 3000);
 server.listen(process.env.PORT||3000);
-console.log("Backend Running on Port 3000");
+console.log("Backend Running on Port " + (process.env.PORT||3000));
 
 var currentClient = null;
 //change this to a stack, so we can keep multiple users here
@@ -580,6 +580,68 @@ app.get('/api/getuserInformation/:_userID',function(req,res){
             res.json({"status":true, "data":user});
         }
     });
+});
+
+app.get('/api/getUserInfoAndBudgets/:_userID', async function(req,res){
+    var User_ID = req.params._userID;
+
+    var response = {};
+
+    // User information, from the user table
+    var userinfo = await Users.find({"UWID": User_ID});
+    if (userinfo == null || userinfo[0] == null || userinfo[0]._id == null)
+    {
+        res.json({"status":false, "data": "User '" + User_ID + "' not found"});
+	return;
+    }
+    response.user = userinfo[0];
+    var UID = userinfo[0]._id;
+    
+    // Units in which this user has roles
+    var unitinfo = await Units.find({"userIDs.ID": UID}).exec(); // , {"unitName": 1, "subUnitIDs": 1, "userIDs.ID": 1, "userIDs.Admin": 1});
+    if(unitinfo == null)
+    {
+        res.json({"status":false, "data": "Query failed searching for units for user '" + User_ID + "'"});
+	return;
+    }
+
+    response.units = {};
+    for (i=0; i < unitinfo.length; i++) {
+        var unit = unitinfo[i];
+	var unitid = unit["_id"];
+	response.units[unitid] = {"name": unit.unitName};
+	response.roles = [];
+        for (j = 0; j < unit.userIDs.length; j++) {
+            var user = unit.userIDs[j];
+	    // If this matches my name, I have a role here.
+	    // If it is "Admin: true" then it is admin, otherwise staff.
+	    if (("" + user.ID) == ("" + UID)) {
+		if (user.Admin == true)
+		    response.roles.push({"type": "unit", "unit": unitid, "role": "Financial Administrator"});
+		else
+		    response.roles.push({"type": "unit", "unit": unitid, "role": "Financial Staff"});
+	    }
+	}
+    }
+
+    var subunitinfo = await SubUnits.find({"Submitters_IDs": UID}, {"ID": 1, "subUnitName": 1, "UnitID_ref": 1}).exec();
+    if (subunitinfo == null)
+    {
+        res.json({"status":false, "data": "Query failed searching for subunits for user '" + User_ID + "'"});
+	return;
+    }
+    response.subunits = subunitinfo;
+
+    var submitter_budgets = await SubUnits.find({"Submitters_IDs": UID}, {"BudgetTable": 1}).exec();
+    if (submitter_budgets == null)
+    {
+        res.json({"status":false, "data": "Query failed searching for submitter budgets for user '" + User_ID + "'"});
+	return;
+    }
+    var budgetList = submitter_budgets[0]["BudgetTable"];
+    response.submitter_budgets = budgetList;
+
+    res.json({"status":true, "data":response});
 });
 
 app.get('/api/getBudgetsUnderSubUnit/:_subUnitID',function(req,res){
