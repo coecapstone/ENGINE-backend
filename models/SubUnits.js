@@ -1004,7 +1004,7 @@ module.exports.loginUser = async function(UWID,callback){
         "userInfo": null,
         "submitter":[],
         "approver":[],
-        "fisacalStaff":[],
+        "fiscalStaff":[],
         "fiscalAdmin":[]
     }
 
@@ -1030,7 +1030,7 @@ module.exports.loginUser = async function(UWID,callback){
                     if(res[x].userIDs[y].Admin)
                         possible_roles.fiscalAdmin.push({"UnitName":res[x].unitName, "UnitID":res[x]._id});
                     else
-                        possible_roles.fisacalStaff.push({"UnitName":res[x].unitName, "UnitID":res[x]._id});  
+                        possible_roles.fiscalStaff.push({"UnitName":res[x].unitName, "UnitID":res[x]._id});  
             }
 
     }catch{
