@@ -63,28 +63,29 @@ app.get('/',function(req,res){
     res.send('Please use /api/ to access the API');
 });
 
-// For debugging only, a GET version
-app.get('/api/whoami',function(req,res){
+function whoami(req) {
     var uwnetid = null;
     for (let k in req.headers) {
       if (k == 'x-remote-user') {
         uwnetid = req.headers[k];
       }
     }
-    res.end('Hello ' + uwnetid);
+    if (uwnetid != null)
+        uwnetid = uwnetid.replace("@washington.edu", "");
+    // uwnetid = "perseant"; // override 
+    return uwnetid;
+}
+
+// For debugging only, a GET version
+app.get('/api/whoami',function(req,res){
+    res.end('Hello ' + whoami(req));
 });
 
 app.post('/api/whoami',function(req,res){
-    var uwnetid = null;
-    for (let k in req.headers) {
-      if (k == 'x-remote-user') {
-        uwnetid = req.headers[k];
-      }
-    }
+    var uwnetid = whoami(req);
     if (uwnetid == null)
         res.json({"status":false});
     else {
-        uwnetid = uwnetid.replace("@washington.edu", "");
         res.json({"status":true, "data":{"uwnetid":uwnetid}});
     }
 });
@@ -582,8 +583,8 @@ app.get('/api/getuserInformation/:_userID',function(req,res){
     });
 });
 
-app.get('/api/getUserInfoAndBudgets/:_userID', async function(req,res){
-    var User_ID = req.params._userID;
+app.get('/api/getUserInfoAndBudgets', async function(req,res){
+    var User_ID = whoami(req);
 
     var response = {};
 
