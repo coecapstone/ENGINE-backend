@@ -121,11 +121,21 @@ module.exports.getAllUnits = async function ()
 {
     try{
         return (await Unit.find({}));
-    }catch //cath will be executed when mongoose cant find the record !
+    }catch //catch will be executed when mongoose cant find the record !
     {
         return null;
     }
     
+}
+
+// this function returns all Units in the collection *and* executes the callback
+module.exports.getAllUnitsCallback = async function (callback) {
+    try{
+        callback(null, await Unit.find({}));
+    } catch //catch will be executed when mongoose cant find the record !
+    {
+        callback ('Error retrieving all units', null);
+    }
 }
 
 //this function will check whether if given Unit exists in the collection by its ID

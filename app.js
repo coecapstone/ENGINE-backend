@@ -227,6 +227,19 @@ app.post('/api/units',function(req,res){
     });
 });
 
+//route to get all units
+app.get('/api/allUnits',function(req,res){
+    Units.getAllUnitsCallback(function(err,unit){
+        if(err){
+            res.json({"status":false, "data":err});
+        }else{
+            res.json({"status":true, "data":unit});
+        }
+    });
+});
+
+
+//route to budget information given Budget number
 //route to add new users to Unit
 app.post('/api/units/:_id',function(req,res){
     var Unit_users = req.body;
