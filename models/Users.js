@@ -149,6 +149,15 @@ async function user_exists_inCollection_byEmail_byUWID(email, UWID)
     }
 }
 
+module.exports.user_exists_inCollection_byUWID = async function(UWID)
+{
+    try{
+        return (await User.findOne({"UWID":UWID}));
+    }catch{
+        return null;
+    }
+}
+
 // ------------------- End of Helper Functions --------------------------------------------------------
 
 

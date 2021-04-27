@@ -16,6 +16,7 @@ app.use(bodyParser.json());
 app.use(fileUpload());
 
 //adding all the required Models to the App
+Impersonating = require('./models/Impersonating');
 Users = require('./models/Users');
 Units = require('./models/Units');
 SubUnits = require('./models/SubUnits');
@@ -63,7 +64,7 @@ app.get('/',function(req,res){
     res.send('Please use /api/ to access the API');
 });
 
-function whoami(req) {
+function whoamiReally(req) {
     var uwnetid = null;
     for (let k in req.headers) {
       if (k == 'x-remote-user') {
@@ -76,17 +77,30 @@ function whoami(req) {
     return uwnetid;
 }
 
+async function whoamiPretendingToBe(req) {
+    var uwnetid = whoamiReally(req);
+    //console.log('before impersonation, uwnetid is: ' + uwnetid);
+    var result = null;
+    result = await Impersonating.isImpersonating(uwnetid);
+    //console.log('after impersonation, uwnetid is: ' + result);
+    return result ? result : uwnetid;
+}
+
 // For debugging only, a GET version
-app.get('/api/whoami',function(req,res){
-    res.end('Hello ' + whoami(req));
+app.get('/api/whoami',async function(req,res){
+    var who = await whoamiPretendingToBe(req);
+    res.end('Hello ' + who);
 });
 
-app.post('/api/whoami',function(req,res){
-    var uwnetid = whoami(req);
-    if (uwnetid == null)
+app.post('/api/whoami', async function(req,res){
+    var true_uwnetid = whoamiReally(req);
+    var uwnetid = await whoamiPretendingToBe(req);
+
+    if (uwnetid == null) {
+        //console.log('after impersonation, uwnetid is null!');
         res.json({"status":false});
-    else {
-        res.json({"status":true, "data":{"uwnetid":uwnetid}});
+    } else {
+        res.json({"status":true, "data":{"uwnetid":uwnetid, "true_uwnetid":true_uwnetid}});
     }
 });
 
@@ -106,6 +120,19 @@ app.post('/api/testNotification',function(req,res){
 
 //------------------------------------------------------------------------------------------------
 
+// ---- Impersonating Routes -------
+
+app.post('/api/impersonate/:name', async function(req,res){
+    var impName = req.params.name;
+
+    Impersonating.addImpersonating(await whoamiReally(req), impName, function(err, value){
+        if(err){
+            res.json({"status":false, "data":err});
+        }else{
+            res.json({"status":true, "data":impName});
+        }
+    });
+});
 
 
 // ---- User Routes -------
@@ -597,9 +624,12 @@ app.get('/api/getuserInformation/:_userID',function(req,res){
 });
 
 app.get('/api/getUserInfoAndBudgets', async function(req,res){
-    var User_ID = whoami(req);
+    var User_ID = whoamiPretendingToBe(req);
 
     var response = {};
+
+    // My true name, for impersonation purposes
+    response.truename = whoamiReally(req);
 
     // User information, from the user table
     var userinfo = await Users.find({"UWID": User_ID});
