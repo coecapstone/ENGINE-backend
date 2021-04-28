@@ -624,7 +624,7 @@ app.get('/api/getuserInformation/:_userID',function(req,res){
 });
 
 app.get('/api/getUserInfoAndBudgets', async function(req,res){
-    var User_ID = whoamiPretendingToBe(req);
+    var User_ID = await whoamiPretendingToBe(req);
 
     var response = {};
 
