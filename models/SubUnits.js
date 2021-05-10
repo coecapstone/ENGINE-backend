@@ -502,13 +502,13 @@ module.exports.addApprover = async function(subunitID,budgetID,approver_JSON,cal
 
 
     //second check if at least one of the given approvers IDs exists in the submitters arrray if yes, then we cannot add them
-    const check_matched_IDs = check_UserID_exists_in_SubmittersIDs(passedIn_approvers_IDs,fetched_SubUnit);
-    
-    if(check_matched_IDs != null)
-    {
-        callback(`Following IDs ${check_matched_IDs} are assigned as submitters in the backend and can not set them as approvers`,null);
-        return;
-    }
+    //const check_matched_IDs = check_UserID_exists_in_SubmittersIDs(passedIn_approvers_IDs,fetched_SubUnit);
+    //
+    //if(check_matched_IDs != null)
+    //{
+    //    callback(`Following IDs ${check_matched_IDs} are assigned as submitters in the backend and can not set them as approvers`,null);
+    //    return;
+    //}
 
     //multiple budgets can have same approver in the approver array. So we dont have to check that
 

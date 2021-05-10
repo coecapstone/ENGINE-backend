@@ -855,6 +855,15 @@ module.exports.findOrdersForFiscal = async function (Unit_ID,callback)
 module.exports.ApproverResponse = async function(orderID, approverID, budgetNumber, LineItemNumber,response,callback)
 {
     try{
+	// Look at the submitter for this response.  If it is the same as the approver, reject.
+	// XXX there are certain conditions where users *can* approve their own orders.
+	// XXX Add that logic here.
+	const asis_order = await Order.findOne({"_id": orderID});
+	if (asis_order.userID_ref == approverID) {
+            callback("You may not approve your own orders.  Sorry!", null);
+            return;
+	}
+
         const info =  await Order.findOneAndUpdate({"_id":orderID, "AwaitingResponses":approverID, "ApprovalResponses.BudgetNumber":budgetNumber, "ApprovalResponses.lineItemID": LineItemNumber}, 
         {'$set': 
         {'ApprovalResponses.$[approvalResponseObj].approverResponses.$[approverResponseObj].response':response}},
