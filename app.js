@@ -572,10 +572,18 @@ app.get('/api/getSubmitterInfo/:_subUnitID/',function(req,res){
     });
 });
 
-app.get('/api/login/:_netID',function(req,res){
-    var User_JSON = req.params._netID;
+app.get('/api/login/:_netID', async function(req,res){
+    var arg_netid = req.params._netID;
 
-    SubUnits.loginUser(User_JSON,function(err,user){
+    // Require that the stated user is the real user
+    // XXX just ignore arg_netid entirely!
+    var auth_netid = await whoamiPretendingToBe(req);
+    if (auth_netid != arg_netid) {
+        res.json({"status":false, "data":"You are authenticated as user '" + auth_netid + "', not as user '" + arg_netid + "'.  Sorry!"});
+	return;
+    }
+
+    SubUnits.loginUser(arg_netid,function(err,user){
         if(err){
             res.json({"status":false, "data":err});
         }else{
